@@ -54,7 +54,11 @@ impl ExecutorFactory for Factory {
         sp: SP,
     ) -> Option<Box<dyn BlockExecutor<SP> + 'a>> {
         let database_state = State::new(sp);
-        Some(Box::new(NewExecutor::new(self.chain_spec.clone(), database_state)))
+        let mut evm = Box::new(NewExecutor::new(self.chain_spec.clone(), database_state));
+        if let Some(ref stack) = self.stack {
+            evm.set_stack(stack.clone());
+        }
+        Some(evm)
     }
 
     /// Return internal chainspec

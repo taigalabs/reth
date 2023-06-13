@@ -14,7 +14,7 @@ use reth_primitives::{
 use reth_provider::{BlockExecutor, PostState, StateChange, StateProvider};
 use revm::{primitives::ResultAndState, DatabaseCommit, State as RevmState, EVM};
 use std::{collections::HashMap, sync::Arc};
-use tracing::warn;
+use tracing::{debug, warn};
 
 /// Main block executor
 pub struct NewExecutor<'a> {
@@ -55,9 +55,8 @@ impl<'a> NewExecutor<'a> {
     }
 
     /// Configures the executor with the given inspectors.
-    pub fn with_stack(mut self, stack: InspectorStack) -> Self {
+    pub fn set_stack(&mut self, stack: InspectorStack) {
         self.stack = stack;
-        self
     }
 
     /// Gives a reference to the database
@@ -187,6 +186,7 @@ impl<'a> NewExecutor<'a> {
     ) -> Result<u64, BlockExecutionError> {
         // perf: do not execute empty blocks
         if block.body.is_empty() {
+            self.receipts.push((block.number,Vec::new()));
             return Ok(0);
         }
         let senders = self.recover_senders(&block.body, senders)?;
@@ -207,7 +207,7 @@ impl<'a> NewExecutor<'a> {
             }
             // Execute transaction.
             let ResultAndState { result, state } = self.transact(transaction, sender)?;
-            warn!("RESULT= {:?}", result);
+            //println!("\nRESULT: {result:?}\nSTATE:{state:?}");
             // commit changes to database.
             self.db().commit(state);
 
@@ -225,6 +225,7 @@ impl<'a> NewExecutor<'a> {
                 logs: result.into_logs().into_iter().map(into_reth_log).collect(),
             });
         }
+        //println!("    {} RECEIPTS:{receipts:?}",block.number);
         self.receipts.push((block.number, receipts));
 
         Ok(cumulative_gas_used)
@@ -283,11 +284,19 @@ impl<'a, SP: StateProvider> BlockExecutor<SP> for NewExecutor<'a> {
         // transaction This was replaced with is_success flag.
         // See more about EIP here: https://eips.ethereum.org/EIPS/eip-658
         if self.chain_spec.fork(Hardfork::Byzantium).active_at_block(block.header.number) {
-            verify_receipt(
+            if let Err(e) = verify_receipt(
                 block.header.receipts_root,
                 block.header.logs_bloom,
-                post_state.receipts(block.number).iter(),
-            )?;
+                self.receipts.last().unwrap().1.iter(),
+            ) {
+                debug!(
+                    target = "sync",
+                    "receipts verification failed {:?} receipts:{:?}",
+                    e,
+                    self.receipts.last().unwrap()
+                );
+                return Err(e);
+            };
         }
 
         Ok(post_state)

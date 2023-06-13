@@ -54,6 +54,7 @@ pub trait BlockExecutor<SP: StateProvider> {
     /// TEMPORARY return post state after execution multiple blocks.
     /// Idea is to hide multi block execution.
     fn take_state_change(&mut self) -> StateChange {
-        StateChange::default()
+        panic!("Not implemented");
+        //StateChange::default()
     }
 }
