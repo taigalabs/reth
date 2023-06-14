@@ -21,7 +21,7 @@ pub enum StageId {
 
 impl StageId {
     /// All supported Stages
-    pub const ALL: [StageId; 13] = [
+    pub const ALL: [StageId; 12] = [
         StageId::Headers,
         StageId::Bodies,
         StageId::SenderRecovery,
