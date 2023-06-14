@@ -1463,8 +1463,7 @@ mod tests {
                 pipeline = pipeline.with_max_block(max_block);
             }
 
-            let pipeline = pipeline
-                .build(db.clone(), self.chain_spec.clone());
+            let pipeline = pipeline.build(db.clone(), self.chain_spec.clone());
 
             // Setup blockchain tree
             let externals = TreeExternals::new(
@@ -1596,9 +1595,9 @@ mod tests {
         );
 
         let (consensus_engine, env) = TestConsensusEngineBuilder::new(chain_spec.clone())
-            .with_pipeline_exec_outputs(VecDeque::from([
-                Ok(ExecOutput { checkpoint: StageCheckpoint::new(1) }),
-            ]))
+            .with_pipeline_exec_outputs(VecDeque::from([Ok(ExecOutput {
+                checkpoint: StageCheckpoint::new(1),
+            })]))
             .disable_blockchain_tree_sync()
             .with_max_block(2)
             .build();
