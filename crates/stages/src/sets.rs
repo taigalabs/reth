@@ -40,7 +40,7 @@ use crate::{
     stages::{
         AccountHashingStage, BodyStage, ExecutionStage, FinishStage, HeaderStage, HeaderSyncMode,
         IndexAccountHistoryStage, IndexStorageHistoryStage, MerkleStage, SenderRecoveryStage,
-        StorageHashingStage, TotalDifficultyStage, TransactionLookupStage,
+        StorageHashingStage, TotalDifficultyStage,
     },
     StageSet, StageSetBuilder,
 };
@@ -70,7 +70,6 @@ use std::sync::Arc;
 /// - [`AccountHashingStage`]
 /// - [`StorageHashingStage`]
 /// - [`MerkleStage`] (execute)
-/// - [`TransactionLookupStage`]
 /// - [`IndexStorageHistoryStage`]
 /// - [`IndexAccountHistoryStage`]
 /// - [`FinishStage`]
@@ -275,7 +274,6 @@ pub struct HistoryIndexingStages;
 impl<DB: Database> StageSet<DB> for HistoryIndexingStages {
     fn builder(self) -> StageSetBuilder<DB> {
         StageSetBuilder::default()
-            .add_stage(TransactionLookupStage::default())
             .add_stage(IndexStorageHistoryStage::default())
             .add_stage(IndexAccountHistoryStage::default())
     }

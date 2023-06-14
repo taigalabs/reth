@@ -18,7 +18,7 @@ use reth_stages::{
     stages::{
         AccountHashingStage, BodyStage, ExecutionStage, ExecutionStageThresholds,
         IndexAccountHistoryStage, IndexStorageHistoryStage, MerkleStage, SenderRecoveryStage,
-        StorageHashingStage, TransactionLookupStage,
+        StorageHashingStage,
     },
     ExecInput, ExecOutput, PipelineError, Stage, UnwindInput,
 };
@@ -196,7 +196,6 @@ impl Command {
                         None,
                     )
                 }
-                StageEnum::TxLookup => (Box::new(TransactionLookupStage::new(batch_size)), None),
                 StageEnum::AccountHashing => {
                     (Box::new(AccountHashingStage::new(1, batch_size)), None)
                 }

@@ -83,6 +83,7 @@ impl<DB: Database, D: BodyDownloader> Stage<DB> for BodyStage<D> {
         let tx = provider.tx_ref();
         let mut block_indices_cursor = tx.cursor_write::<tables::BlockBodyIndices>()?;
         let mut tx_cursor = tx.cursor_write::<tables::Transactions>()?;
+        let mut tx_hash_number_cursor = tx.cursor_write::<tables::TxHashNumber>()?;
         let mut tx_block_cursor = tx.cursor_write::<tables::TransactionBlock>()?;
         let mut ommers_cursor = tx.cursor_write::<tables::BlockOmmers>()?;
         let mut withdrawals_cursor = tx.cursor_write::<tables::BlockWithdrawals>()?;
@@ -120,6 +121,8 @@ impl<DB: Database, D: BodyDownloader> Stage<DB> for BodyStage<D> {
 
                     // Write transactions
                     for transaction in block.body {
+                        // Insert hash -> tx ID mapping
+                        tx_hash_number_cursor.insert(transaction.hash, next_tx_num)?;
                         // Append the transaction
                         tx_cursor.append(next_tx_num, transaction.into())?;
                         // Increment transaction id for each transaction.

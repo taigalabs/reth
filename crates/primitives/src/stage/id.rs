@@ -15,7 +15,6 @@ pub enum StageId {
     MerkleExecute,
     MerkleUnwind,
     Execution,
-    TransactionLookup,
     Finish,
     Other(&'static str),
 }
@@ -34,7 +33,6 @@ impl StageId {
         StageId::MerkleExecute,
         StageId::MerkleUnwind,
         StageId::Execution,
-        StageId::TransactionLookup,
         StageId::Finish,
     ];
 
@@ -52,7 +50,6 @@ impl StageId {
             StageId::MerkleExecute => "MerkleExecute",
             StageId::MerkleUnwind => "MerkleUnwind",
             StageId::Execution => "Execution",
-            StageId::TransactionLookup => "TransactionLookup",
             StageId::Finish => "Finish",
             StageId::Other(s) => s,
         }
@@ -92,7 +89,6 @@ mod tests {
         assert_eq!(StageId::MerkleExecute.to_string(), "MerkleExecute");
         assert_eq!(StageId::IndexAccountHistory.to_string(), "IndexAccountHistory");
         assert_eq!(StageId::IndexStorageHistory.to_string(), "IndexStorageHistory");
-        assert_eq!(StageId::TransactionLookup.to_string(), "TransactionLookup");
         assert_eq!(StageId::Finish.to_string(), "Finish");
 
         assert_eq!(StageId::Other("Foo").to_string(), "Foo");

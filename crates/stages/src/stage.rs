@@ -77,7 +77,7 @@ impl ExecInput {
         &self,
         provider: &DatabaseProviderRW<'_, DB>,
         tx_threshold: u64,
-    ) -> Result<(RangeInclusive<TxNumber>, RangeInclusive<BlockNumber>, bool), StageError> {
+    ) -> Result<(RangeInclusive<TxNumber>, RangeInclusive<BlockNumber>), StageError> {
         let start_block = self.next_block();
         let start_block_body = provider
             .tx_ref()
@@ -100,8 +100,7 @@ impl ExecInput {
                 break
             }
         }
-        let is_final_range = end_block_number >= target_block;
-        Ok((first_tx_number..=last_tx_number, start_block..=end_block_number, is_final_range))
+        Ok((first_tx_number..=last_tx_number, start_block..=end_block_number))
     }
 }
 
