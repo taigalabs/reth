@@ -49,6 +49,8 @@ impl DerefMut for AppendableChain {
 impl AppendableChain {
     /// Crate a new appendable chain from a given chain.
     pub fn new(chain: Chain) -> Self {
+        println!("AppendableChain::new()");
+
         Self { chain }
     }
 
@@ -244,7 +246,7 @@ impl AppendableChain {
                 got: state_root,
                 expected: block.state_root,
             }
-            .into())
+            .into());
         }
 
         Ok(post_state)

@@ -88,6 +88,8 @@ where
 {
     /// Create a new [StateRoot] instance.
     pub fn new(tx: &'a TX) -> Self {
+        // println!("123123 trie");
+
         Self {
             tx,
             changed_account_prefixes: PrefixSet::default(),
@@ -267,7 +269,7 @@ where
                 if let Some(ref key) = next_key {
                     if key < &account_nibbles {
                         tracing::trace!(target: "loader", "breaking, already detected");
-                        break
+                        break;
                     }
                 }
 
@@ -325,7 +327,7 @@ where
                         Box::new(state),
                         hashed_entries_walked,
                         trie_updates,
-                    ))
+                    ));
                 }
 
                 // Move the next account entry
@@ -455,7 +457,7 @@ where
                 EMPTY_ROOT,
                 0,
                 TrieUpdates::from([(TrieKey::StorageTrie(self.hashed_address), TrieOp::Delete)]),
-            ))
+            ));
         }
 
         let mut walker = TrieWalker::new(&mut trie_cursor, self.changed_prefixes.clone())
@@ -482,7 +484,7 @@ where
                 let storage_key_nibbles = Nibbles::unpack(hashed_key);
                 if let Some(ref key) = next_key {
                     if key < &storage_key_nibbles {
-                        break
+                        break;
                     }
                 }
                 hash_builder

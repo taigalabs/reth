@@ -114,6 +114,8 @@ async fn dry_run<DB: Database>(
     to: u64,
     from: u64,
 ) -> eyre::Result<()> {
+    println!("merkle::dry_run()");
+
     info!(target: "reth::cli", "Executing stage.");
     let shareable_db = ShareableDatabase::new(&output_db, chain);
     let mut provider = shareable_db.provider_rw()?;

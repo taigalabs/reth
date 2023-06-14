@@ -16,6 +16,8 @@ use reth_tracing::{
 
 /// Parse CLI options, set up logging and run the chosen command.
 pub fn run() -> eyre::Result<()> {
+    println!("cli::run()");
+
     let opt = Cli::parse();
 
     let mut layers = vec![reth_tracing::stdout(opt.verbosity.directive())];

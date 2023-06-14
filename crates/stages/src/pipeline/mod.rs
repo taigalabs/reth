@@ -155,6 +155,8 @@ where
     pub fn run_as_fut(mut self, tip: Option<H256>) -> PipelineFut<DB> {
         // TODO: fix this in a follow up PR. ideally, consensus engine would be responsible for
         // updating metrics.
+        println!("Pipeline::run_as_fut(), target: tip: {:?}", tip);
+
         let _ = self.register_metrics(); // ignore error
         Box::pin(async move {
             // NOTE: the tip should only be None if we are in continuous sync mode.
@@ -171,14 +173,17 @@ where
     /// a `max_block` in the pipeline.
     pub async fn run(&mut self) -> Result<(), PipelineError> {
         let _ = self.register_metrics(); // ignore error
+                                         //
+        println!("Pipeline::run()");
 
         loop {
             let next_action = self.run_loop().await?;
 
             // Terminate the loop early if it's reached the maximum user
             // configured block.
-            if next_action.should_continue() &&
-                self.progress
+            if next_action.should_continue()
+                && self
+                    .progress
                     .minimum_progress
                     .zip(self.max_block)
                     .map_or(false, |(progress, target)| progress >= target)
@@ -190,7 +195,7 @@ where
                     max_block = ?self.max_block,
                     "Terminating pipeline."
                 );
-                return Ok(())
+                return Ok(());
             }
         }
     }
@@ -213,6 +218,8 @@ where
                 .instrument(info_span!("execute", stage = %stage_id))
                 .await?;
 
+            println!("Pipeline::run_loop(), stage_id: {:?}", stage_id);
+
             trace!(target: "sync::pipeline", stage = %stage_id, ?next, "Completed stage");
 
             match next {
@@ -224,7 +231,7 @@ where
                 ControlFlow::Continue { progress } => self.progress.update(progress),
                 ControlFlow::Unwind { target, bad_block } => {
                     self.unwind(target, Some(bad_block.number)).await?;
-                    return Ok(ControlFlow::Unwind { target, bad_block })
+                    return Ok(ControlFlow::Unwind { target, bad_block });
                 }
             }
 
@@ -259,7 +266,7 @@ where
             if checkpoint.block_number < to {
                 debug!(target: "sync::pipeline", from = %checkpoint, %to, "Unwind point too far for stage");
                 self.listeners.notify(PipelineEvent::Skipped { stage_id });
-                continue
+                continue;
             }
 
             let mut done = UnwindInput { checkpoint, unwind_to: to, bad_block }.target_reached();
@@ -302,7 +309,7 @@ where
                     }
                     Err(err) => {
                         self.listeners.notify(PipelineEvent::Error { stage_id });
-                        return Err(PipelineError::Stage(StageError::Fatal(Box::new(err))))
+                        return Err(PipelineError::Stage(StageError::Fatal(Box::new(err))));
                     }
                 }
             }
@@ -316,6 +323,8 @@ where
         previous_stage: Option<BlockNumber>,
         stage_index: usize,
     ) -> Result<ControlFlow, PipelineError> {
+        println!("BlockchainTree::execute_stage_to_completion()");
+
         let total_stages = self.stages.len();
 
         let stage = &mut self.stages[stage_index];
@@ -328,6 +337,7 @@ where
 
         loop {
             let prev_checkpoint = provider_rw.get_stage_checkpoint(stage_id)?;
+            println!("prev_checkpoint: {:?}", prev_checkpoint);
 
             let stage_reached_max_block = prev_checkpoint
                 .zip(self.max_block)
@@ -345,7 +355,7 @@ where
                 // We reached the maximum block, so we skip the stage
                 return Ok(ControlFlow::NoProgress {
                     stage_progress: prev_checkpoint.map(|progress| progress.block_number),
-                })
+                });
             }
 
             self.listeners.notify(PipelineEvent::Running {
@@ -398,7 +408,7 @@ where
                             ControlFlow::Continue { progress: stage_progress }
                         } else {
                             ControlFlow::NoProgress { stage_progress: Some(stage_progress) }
-                        })
+                        });
                     }
                 }
                 Err(err) => {
@@ -462,9 +472,9 @@ where
                             stage = %stage_id,
                             "Stage encountered a non-fatal error: {err}. Retrying..."
                         );
-                        continue
+                        continue;
                     };
-                    return out
+                    return out;
                 }
             }
         }
