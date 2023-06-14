@@ -110,6 +110,8 @@ where
         tx: &'a TX,
         range: RangeInclusive<BlockNumber>,
     ) -> Result<Self, StateRootError> {
+        println!("StateRoot::incremental_root_calculator(): range: {:?}", range);
+
         let (account_prefixes, storage_prefixes) = PrefixSetLoader::new(tx).load(range)?;
         Ok(Self::new(tx)
             .with_changed_account_prefixes(account_prefixes)
@@ -126,6 +128,8 @@ where
         tx: &'a TX,
         range: RangeInclusive<BlockNumber>,
     ) -> Result<H256, StateRootError> {
+        println!("StateRoot::incremental_root()");
+
         tracing::debug!(target: "loader", "incremental state root");
         Self::incremental_root_calculator(tx, range)?.root()
     }
@@ -175,6 +179,8 @@ where
     ///
     /// The intermediate progress of state root computation and the trie updates.
     pub fn root_with_updates(self) -> Result<(H256, TrieUpdates), StateRootError> {
+        println!("StateRoot::root_with_updates()");
+
         match self.with_no_threshold().calculate(true)? {
             StateRootProgress::Complete(root, _, updates) => Ok((root, updates)),
             StateRootProgress::Progress(..) => unreachable!(), // unreachable threshold
@@ -205,7 +211,10 @@ where
     }
 
     fn calculate(self, retain_updates: bool) -> Result<StateRootProgress, StateRootError> {
+        println!("StateRoot::calcalate()");
+
         tracing::debug!(target: "loader", "calculating state root");
+
         let mut trie_updates = TrieUpdates::default();
 
         let mut hashed_account_cursor = self.hashed_cursor_factory.hashed_account_cursor()?;
@@ -442,6 +451,8 @@ where
         &self,
         retain_updates: bool,
     ) -> Result<(H256, usize, TrieUpdates), StorageRootError> {
+        println!("StorageRoot::calculate()");
+
         tracing::debug!(target: "trie::storage_root", hashed_address = ?self.hashed_address, "calculating storage root");
 
         let mut hashed_storage_cursor = self.hashed_cursor_factory.hashed_storage_cursor()?;
